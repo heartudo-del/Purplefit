@@ -1,107 +1,80 @@
 "use client"
 
-import type React from "react"
-
-import { createClient } from "@/lib/supabase/client"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+// --- THIS IS THE CRITICAL FIX ---
+// The path to your Supabase client is likely in the `lib` folder.
+// Please verify this is the correct path in your project.
+import { createClient } from "@/lib/supabase/client" 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-import Image from "next/image"
+import { toast } from "sonner"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const supabase = createClient()
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
-    setError(null)
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
-        },
       })
-      if (error) throw error
+
+      if (error) {
+        throw error
+      }
+
+      toast.success("Login Successful!", { description: "Redirecting to your dashboard..." })
       router.push("/dashboard")
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
+      router.refresh()
+
+    } catch (error) {
+      console.error("Sign in error:", error)
+      toast.error("Login Failed", { description: "Please check your email and password and try again." })
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-gradient-to-br from-purple-50 to-white">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-24 h-16 relative">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PF-FgdJMlTBze74Y6mdKI0AT4NeIf8X7s.png"
-                alt="Purple Fit Logo"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <h1 className="text-2xl font-bold text-center">Welcome to Purple Fit</h1>
-            <p className="text-muted-foreground text-center text-sm">Professional meal planning for nutritionists</p>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-center">Welcome Back</h2>
+        <form onSubmit={handleSignIn} className="space-y-6">
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="you@example.com"
+            />
           </div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Login</CardTitle>
-              <CardDescription>Enter your credentials to access your meal planner</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin}>
-                <div className="flex flex-col gap-6">
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="nutritionist@example.com"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
-                  {error && <p className="text-sm text-red-500">{error}</p>}
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Logging in..." : "Login"}
-                  </Button>
-                </div>
-                <div className="mt-4 text-center text-sm">
-                  Don&apos;t have an account?{" "}
-                  <Link href="/auth/sign-up" className="underline underline-offset-4">
-                    Sign up
-                  </Link>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+          <div>
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Signing In..." : "Sign In"}
+          </Button>
+        </form>
       </div>
     </div>
   )
