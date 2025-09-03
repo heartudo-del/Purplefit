@@ -1,5 +1,7 @@
 @import "tailwindcss";
-@import "tw-animate-css";
+
+/* THE BROKEN LINE "@import "tw-animate-css";" HAS BEEN REMOVED. */
+/* Animations are now handled correctly by the tailwind.config.ts file. */
 
 @custom-variant dark (&:is(.dark *));
 
