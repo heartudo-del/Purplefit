@@ -15,7 +15,7 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - Anything with a file extension (e.g., .svg, .png, .jpg, .json, etc.)
-     * This is the crucial part that will unblock your logo, cover image, and manifest.
+     * This is the crucial part that will unblock your logo, cover image, manifest, AND icons.
      */
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
   ],
