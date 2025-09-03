@@ -23,16 +23,16 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/screenshot-mobile.png",
+      "src": "/screenshots/screenshot-mobile.jpg",
       "sizes": "414x896",
-      "type": "image/png",
+      "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Meal Plan Editor on Mobile"
     },
     {
-      "src": "/screenshots/screenshot-desktop.png",
+      "src": "/screenshots/screenshot-desktop.jpg",
       "sizes": "1280x720",
-      "type": "image/png",
+      "type": "image/jpeg",
       "form_factor": "wide",
       "label": "Meal Plan Editor on Desktop"
     }
