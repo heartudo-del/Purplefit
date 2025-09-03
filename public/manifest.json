@@ -2,6 +2,7 @@
   "name": "Purple Fit Meal Planner",
   "short_name": "Purple Fit",
   "description": "Your personalized meal planning application.",
+  "id": "/dashboard",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -11,13 +12,29 @@
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot-mobile.png",
+      "sizes": "414x896",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Meal Plan Editor on Mobile"
+    },
+    {
+      "src": "/screenshots/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Meal Plan Editor on Desktop"
     }
   ]
 }
