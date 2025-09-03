@@ -1,101 +1,109 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import type { MealPlan } from "@/lib/local-storage"
+import { saveMealPlan, updateMealPlan } from "@/lib/local-storage"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { saveMealPlan, updateMealPlan, type MealPlan } from "@/lib/local-storage"
+import { toast } from "sonner"
 
 interface MealPlanFormProps {
-  initialData?: Partial<MealPlan>
+  initialData?: MealPlan
   isEditing?: boolean
 }
 
 export function MealPlanForm({ initialData, isEditing = false }: MealPlanFormProps) {
-  const [title, setTitle] = useState(initialData?.title || "")
-  const [clientName, setClientName] = useState(initialData?.client_name || "")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [clientName, setClientName] = useState(initialData?.client_name || "");
+  const [category, setCategory] = useState<'Normal' | 'Liver Reset'>(initialData?.category || 'Normal');
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const router = useRouter()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const mealPlanData = {
-        title,
-        client_name: clientName || "",
-        weeks: [
-          {
-            id: crypto.randomUUID(),
-            week_number: 1,
-            meals: [],
-          },
-        ],
-      }
-
-      if (isEditing && initialData?.id) {
-        const result = updateMealPlan(initialData.id, mealPlanData)
-        if (!result) throw new Error("Failed to update meal plan")
-        router.push(`/dashboard/meal-plans/${initialData.id}/edit`)
-      } else {
-        const newMealPlan = saveMealPlan(mealPlanData)
-        router.push(`/dashboard/meal-plans/${newMealPlan.id}/edit`)
-      }
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
-    } finally {
-      setIsLoading(false)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !clientName.trim()) {
+      toast.error("Missing Information", { description: "Please provide a title and client name." });
+      return;
     }
-  }
+
+    setIsSaving(true);
+    try {
+      if (isEditing && initialData?.id) {
+        // --- THIS IS THE CRITICAL FIX ---
+        // Construct the full, updated plan object with all properties.
+        const fullUpdatedPlan: MealPlan = {
+          ...initialData,
+          title,
+          client_name: clientName,
+          category,
+        };
+        
+        // Now, call updateMealPlan with the single, correct argument.
+        const result = updateMealPlan(fullUpdatedPlan);
+        
+        if (!result) throw new Error("Failed to update meal plan");
+        
+        toast.success("Plan Updated!", { description: "Redirecting you to the editor..." });
+        router.push(`/dashboard/meal-plans/${initialData.id}/edit`);
+        router.refresh();
+
+      } else {
+        // This is for creating a new plan
+        const newPlan = saveMealPlan({
+          title,
+          client_name: clientName,
+          weeks: [], // New plans start with no weeks
+          category,
+        });
+        toast.success("Plan Created!", { description: "Redirecting you to the editor..." });
+        router.push(`/dashboard/meal-plans/${newPlan.id}/edit`);
+      }
+    } catch (error) {
+      toast.error("Operation Failed.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isEditing ? "Edit Meal Plan" : "Create New Meal Plan"}</CardTitle>
+        <CardTitle>{isEditing ? "Edit Meal Plan Details" : "Create a New Meal Plan"}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-2">
-            <Label htmlFor="title">Meal Plan Title *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g., Weight Loss Plan - January 2024"
-              required
-            />
+            <Label htmlFor="title">Plan Title *</Label>
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
           </div>
-
           <div className="grid gap-2">
-            <Label htmlFor="client-name">Client Name</Label>
-            <Input
-              id="client-name"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              placeholder="e.g., John Smith"
-            />
+            <Label htmlFor="clientName">Client Name *</Label>
+            <Input id="clientName" value={clientName} onChange={(e) => setClientName(e.target.value)} required />
           </div>
-
-          {error && <div className="text-sm text-red-500 bg-red-50 p-3 rounded-md">{error}</div>}
-
+          <div className="grid gap-2">
+            <Label htmlFor="plan-type">Plan Type</Label>
+            <Select onValueChange={(value: 'Normal' | 'Liver Reset') => setCategory(value)} defaultValue={category}>
+              <SelectTrigger id="plan-type"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Normal">Normal Meal Plan</SelectItem>
+                <SelectItem value="Liver Reset">Liver Reset Plan</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex gap-4">
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Creating..." : isEditing ? "Update Meal Plan" : "Create Meal Plan"}
+              {isLoading ? "Saving..." : isEditing ? "Save Changes" : "Create and Edit Plan"}
             </Button>
-            <Button type="button" variant="outline" onClick={() => router.push("/dashboard/meal-plans")}>
+            <Button type="button" variant="outline" onClick={() => router.back()}>
               Cancel
             </Button>
           </div>
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
