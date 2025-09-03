@@ -20,7 +20,11 @@ export function MealPlanForm({ initialData, isEditing = false }: MealPlanFormPro
   const [title, setTitle] = useState(initialData?.title || "");
   const [clientName, setClientName] = useState(initialData?.client_name || "");
   const [category, setCategory] = useState<'Normal' | 'Liver Reset'>(initialData?.category || 'Normal');
-  const [isLoading, setIsLoading] = useState(false);
+  
+  // --- THIS IS THE CRITICAL FIX ---
+  // The isSaving state variable was missing.
+  const [isSaving, setIsSaving] = useState(false);
+  
   const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,30 +37,23 @@ export function MealPlanForm({ initialData, isEditing = false }: MealPlanFormPro
     setIsSaving(true);
     try {
       if (isEditing && initialData?.id) {
-        // --- THIS IS THE CRITICAL FIX ---
-        // Construct the full, updated plan object with all properties.
         const fullUpdatedPlan: MealPlan = {
           ...initialData,
           title,
           client_name: clientName,
           category,
         };
-        
-        // Now, call updateMealPlan with the single, correct argument.
         const result = updateMealPlan(fullUpdatedPlan);
-        
         if (!result) throw new Error("Failed to update meal plan");
-        
         toast.success("Plan Updated!", { description: "Redirecting you to the editor..." });
         router.push(`/dashboard/meal-plans/${initialData.id}/edit`);
         router.refresh();
 
       } else {
-        // This is for creating a new plan
         const newPlan = saveMealPlan({
           title,
           client_name: clientName,
-          weeks: [], // New plans start with no weeks
+          weeks: [],
           category,
         });
         toast.success("Plan Created!", { description: "Redirecting you to the editor..." });
@@ -65,6 +62,7 @@ export function MealPlanForm({ initialData, isEditing = false }: MealPlanFormPro
     } catch (error) {
       toast.error("Operation Failed.");
     } finally {
+      // It's good practice to also set saving to false here
       setIsSaving(false);
     }
   };
@@ -95,8 +93,8 @@ export function MealPlanForm({ initialData, isEditing = false }: MealPlanFormPro
             </Select>
           </div>
           <div className="flex gap-4">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : isEditing ? "Save Changes" : "Create and Edit Plan"}
+            <Button type="submit" disabled={isSaving}>
+              {isSaving ? "Saving..." : isEditing ? "Save Changes" : "Create and Edit Plan"}
             </Button>
             <Button type="button" variant="outline" onClick={() => router.back()}>
               Cancel
