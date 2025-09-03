@@ -1,48 +1,43 @@
 "use client"
 
-import Link from "next/link"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client" // Corrected path
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
+import { Menu, X } from "lucide-react"
 
-export function DashboardHeader() {
-  const router = useRouter()
-  const supabase = createClient()
+interface DashboardHeaderProps {
+  onMenuToggle?: () => void
+  isMobileMenuOpen?: boolean
+}
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-      toast.success("You have been signed out.")
-      router.push("/") // Redirect to the homepage after sign out
-      router.refresh()
-    } catch (error) {
-      toast.error("Sign out failed.")
-    }
-  }
-
+export function DashboardHeader({ onMenuToggle, isMobileMenuOpen }: DashboardHeaderProps) {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
-        <div className="mr-4 flex">
-          {/* --- THIS IS THE CRITICAL FIX --- */}
-          {/* We use a Link and the Next.js Image component to correctly load the logo */}
-          <Link href="/dashboard" className="flex items-center space-x-2">
-            <Image
-              src="/logo.jpg" // This path correctly points to public/logo.jpg
-              alt="Purple Fit Logo"
-              width={120} // Adjust width as needed
-              height={30} // Adjust height as needed
-              priority // Loads the logo faster
-            />
-          </Link>
-        </div>
-        <div className="flex flex-1 items-center justify-end space-x-2">
-          <Button variant="ghost" onClick={handleSignOut}>
-            Sign Out
-          </Button>
+    <header className="purple-gradient shadow-lg border-b border-purple-300/30">
+      <div className="mx-auto px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onMenuToggle}
+              className="md:hidden p-2 rounded-md text-white hover:bg-white/20 transition-colors"
+            >
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+
+            <div className="w-10 h-7 relative">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PF-FgdJMlTBze74Y6mdKI0AT4NeIf8X7s.png"
+                alt="Purple Fit Logo"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-white">Purple Fit</h1>
+              <p className="text-xs text-purple-100 hidden sm:block">Meal Planner</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs sm:text-sm text-purple-100 hidden sm:block">Nutritionist Dashboard</span>
+          </div>
         </div>
       </div>
     </header>
