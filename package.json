@@ -29,8 +29,7 @@
     "react": "^19",
     "react-dom": "^19",
     "sonner": "latest",
-    "tailwind-merge": "^2.5.5",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwind-merge": "^2.5.5"
   },
   "devDependencies": {
     "@types/node": "^22",
@@ -40,6 +39,7 @@
     "eslint-config-next": "15.1.0",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "^5"
   }
 }
