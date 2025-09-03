@@ -1,20 +1,22 @@
-import { updateSession } from "@/lib/supabase/middleware"
-import type { NextRequest } from "next/server"
+import { type NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase/middleware' // Adjust this path if yours is different
 
 export async function middleware(request: NextRequest) {
+  // This function runs for every matched request to handle authentication.
   return await updateSession(request)
 }
 
 export const config = {
   matcher: [
     /*
-     * Match all request paths except:
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     * Feel free to modify this pattern to include more paths.
+     * - Anything with a file extension (e.g., .svg, .png, .jpg, .json)
+     * This is the crucial part that will unblock your manifest.json and icons.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
   ],
 }
