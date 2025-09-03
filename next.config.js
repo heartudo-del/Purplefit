@@ -1,23 +1,19 @@
-/**
- * @type {import('next-pwa').PWAConfig}
- */
-const withPWA = require("next-pwa")({
+// Import the new PWA library
+const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
-  register: true,
-  skipWaiting: true,
   cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
-  disable: process.env.NODE_ENV === 'development',
+  swcMinify: true,
+  disable: process.env.NODE_ENV === "development",
+  workboxOptions: {
+    disableDevLogs: true,
+  },
 });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Your other Next.js config options can go here if you have any.
-  // For example:
-  // images: {
-  //   remotePatterns: [...]
-  // }
 };
 
-// This is the standard, correct way to apply the PWA configuration
 module.exports = withPWA(nextConfig);
